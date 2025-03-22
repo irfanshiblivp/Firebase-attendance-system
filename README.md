@@ -16,7 +16,7 @@ A **web-based attendance management system** that allows teachers to mark studen
 ## 🚀 How to Set Up  
 
 ### 1️⃣ **Download & Save the File**  
-- Save the provided code as an **HTML file** (e.g., `attendance.html`).  
+- Save the provided code as an **HTML file** (e.g., `index.html`).  
 - Open it in any **web browser** (Chrome, Edge, Firefox).  
 
 ### 2️⃣ **Configure Firebase**  
