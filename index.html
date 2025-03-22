@@ -1,1 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mark Attendance for Students</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #00bcd4;
+      --accent-color: #ff4081;
+      --dark-blue: #003366;
+      --light-bg: #f5f7fa;
+      --transition-speed: 0.3s;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--light-bg);
+      color: var(--dark-blue);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background: var(--primary-color);
+      color: #fff;
+    }
+    button {
+      font-family: 'Poppins', sans-serif;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+    button:hover {
+      background: #008ba3;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mark Attendance for CSE Students</h1>
+    <form id="attendanceForm">
+      <table>
+        <thead>
+          <tr>
+            <th>Roll No.</th>
+            <th>Admission No.</th>
+            <th>Student Name</th>
+            <th>Present?</th>
+          </tr>
+        </thead>
+        <tbody id="studentsTableBody">
+          <!-- Student rows will be inserted here -->
+        </tbody>
+      </table>
+      <button type="button" id="submitBtn">Submit Attendance</button>
+    </form>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "your api key", //paste your api key here
+      databaseURL: "Database url", // paste your database Url here
+      appId: "app id" // your app id here
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // List of 58 CSE students
+    const students = [
+      { roll: 1, admission: "000001", name: "student1" },
+      { roll: 2, admission: "000001", name: "student2" },
+      { roll: 3, admission: "000001", name: "student3" }
+    ];
+
+    // Function to populate table rows
+    function populateTable() {
+      const tbody = document.getElementById("studentsTableBody");
+      students.forEach(student => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${student.roll}</td>
+          <td>${student.admission}</td>
+          <td>${student.name}</td>
+          <td style="text-align:center;"><input type="checkbox" id="present_${student.roll}" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Call populateTable on load
+    populateTable();
+
+    // Submit Attendance function
+    document.getElementById("submitBtn").addEventListener("click", function() {
+      const attendanceDate = new Date().toISOString().split('T')[0];
+      const currentTime = new Date().toLocaleTimeString();
+      const teacherName = "Teacher_Name"; // Replace with dynamic teacher name if needed
+      const subject = "Subject_Name";       // Replace with dynamic subject if needed
+      const className = "class";   //Replace with class
+      
+      // Build promises for all 58 attendance records
+      const promises = students.map(student => {
+        const present = document.getElementById(`present_${student.roll}`).checked;
+        const record = {
+          "Student name": student.name,
+          Admission: student.admission,
+          Date: attendanceDate,
+          Time: currentTime,
+          "Teacher name": teacherName,
+          Subject: subject,
+          Class: className,
+          "A or P": present ? "Present" : "Absent",
+          editCount: 0
+        };
+        // Save record using push()
+        return firebase.database().ref(`/${student.admission}`).push(record);
+      });
+      
+      // After all records are saved, show confirmation
+      Promise.all(promises)
+        .then(() => {
+          alert("Attendance Saved Successfully!");
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Error occurred while saving attendance: " + err.message);
+        });
+    });
+  </script>
+</body>
+</html>
 
